@@ -1,0 +1,9 @@
+N=10 X=4.78/s R=182.2ms p95=266 edge:U=0.08 gateway:U=0.05 profile:U=0.03 schedule:U=0.07 grades:U=0.10 electives:U=0.13 db:U=0.09
+N=10 X=4.85/s R=185.4ms p95=284 edge:U=0.10 gateway:U=0.05 profile:U=0.02 schedule:U=0.06 grades:U=0.09 electives:U=0.14 db:U=0.09
+N=50 X=21.40/s R=225.0ms p95=352 edge:U=0.39 gateway:U=0.21 profile:U=0.12 schedule:U=0.33 grades:U=0.41 electives:U=0.58 db:U=0.40
+N=50 X=21.88/s R=226.3ms p95=358 edge:U=0.39 gateway:U=0.21 profile:U=0.13 schedule:U=0.33 grades:U=0.43 electives:U=0.60 db:U=0.41
+N=90 X=35.32/s R=557.4ms p95=885 edge:U=0.61 gateway:U=0.34 profile:U=0.20 schedule:U=0.52 grades:U=0.70 electives:U=0.98 db:U=0.65
+N=90 X=34.75/s R=579.4ms p95=1063 edge:U=0.64 gateway:U=0.33 profile:U=0.20 schedule:U=0.50 grades:U=0.69 electives:U=0.98 db:U=0.64
+N=130 X=35.48/s R=1646.2ms p95=2100 edge:U=0.63 gateway:U=0.34 profile:U=0.20 schedule:U=0.53 grades:U=0.70 electives:U=1.00 db:U=0.65
+N=130 X=36.42/s R=1583.3ms p95=2168 edge:U=0.62 gateway:U=0.35 profile:U=0.22 schedule:U=0.55 grades:U=0.72 electives:U=1.00 db:U=0.69
+MONO_DONE

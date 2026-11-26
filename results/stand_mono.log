@@ -1,0 +1,7 @@
+edge on 7001 (c=2)
+gateway on 7002 (c=2)
+profile on 7011 (c=1)
+schedule on 7012 (c=1)
+db on 7020 (c=2)
+grades on 7013 (c=1)
+electives on 7014 (c=1)

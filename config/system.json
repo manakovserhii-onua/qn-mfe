@@ -1,0 +1,297 @@
+{
+  "_comment": "Case 'Electronic dean's office': shell + K micro-frontends + API gateway + microservices + DBMS. Demands are mean service times per visit, ms (exponential). The same file drives the testbed, the load generator, the analytical model and the simulator.",
+  "think_time_ms": 2000,
+  "client_rtt_ms": 20,
+  "service_distribution": "exp",
+  "stations": {
+    "edge": {
+      "port": 7001,
+      "servers": 2,
+      "role": "static assets server (shell, remoteEntry, chunks)"
+    },
+    "gateway": {
+      "port": 7002,
+      "servers": 2,
+      "role": "API gateway / BFF"
+    },
+    "profile": {
+      "port": 7011,
+      "servers": 1,
+      "role": "profile & session microservice"
+    },
+    "schedule": {
+      "port": 7012,
+      "servers": 1,
+      "role": "schedule microservice"
+    },
+    "grades": {
+      "port": 7013,
+      "servers": 1,
+      "role": "grades microservice"
+    },
+    "electives": {
+      "port": 7014,
+      "servers": 1,
+      "role": "elective courses microservice"
+    },
+    "db": {
+      "port": 7020,
+      "servers": 2,
+      "role": "DBMS"
+    }
+  },
+  "architectures": {
+    "mfe": {
+      "description": "Runtime composition: shell, then profile API, then K parallel branches (remoteEntry -> chunk -> API).",
+      "sequential": [
+        {
+          "name": "shell",
+          "chain": [
+            [
+              "edge",
+              6
+            ]
+          ]
+        },
+        {
+          "name": "profile",
+          "chain": [
+            [
+              "gateway",
+              5
+            ],
+            [
+              "profile",
+              6
+            ],
+            [
+              "db",
+              4
+            ]
+          ]
+        }
+      ],
+      "parallel": [
+        {
+          "name": "schedule",
+          "requests": [
+            {
+              "name": "remoteEntry",
+              "chain": [
+                [
+                  "edge",
+                  4
+                ]
+              ]
+            },
+            {
+              "name": "chunk",
+              "chain": [
+                [
+                  "edge",
+                  10
+                ]
+              ]
+            },
+            {
+              "name": "api",
+              "chain": [
+                [
+                  "gateway",
+                  5
+                ],
+                [
+                  "schedule",
+                  15
+                ],
+                [
+                  "db",
+                  8
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "grades",
+          "requests": [
+            {
+              "name": "remoteEntry",
+              "chain": [
+                [
+                  "edge",
+                  4
+                ]
+              ]
+            },
+            {
+              "name": "chunk",
+              "chain": [
+                [
+                  "edge",
+                  10
+                ]
+              ]
+            },
+            {
+              "name": "api",
+              "chain": [
+                [
+                  "gateway",
+                  5
+                ],
+                [
+                  "grades",
+                  20
+                ],
+                [
+                  "db",
+                  10
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "electives",
+          "requests": [
+            {
+              "name": "remoteEntry",
+              "chain": [
+                [
+                  "edge",
+                  4
+                ]
+              ]
+            },
+            {
+              "name": "chunk",
+              "chain": [
+                [
+                  "edge",
+                  10
+                ]
+              ]
+            },
+            {
+              "name": "api",
+              "chain": [
+                [
+                  "gateway",
+                  5
+                ],
+                [
+                  "electives",
+                  28
+                ],
+                [
+                  "db",
+                  16
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    "mono": {
+      "description": "Monolithic SPA with the same functionality: one bundle (shell + all modules) from the edge, profile API, then the three module APIs fetched in parallel (no remoteEntry requests).",
+      "sequential": [
+        {
+          "name": "bundle",
+          "chain": [
+            [
+              "edge",
+              36
+            ]
+          ]
+        },
+        {
+          "name": "profile",
+          "chain": [
+            [
+              "gateway",
+              5
+            ],
+            [
+              "profile",
+              6
+            ],
+            [
+              "db",
+              4
+            ]
+          ]
+        }
+      ],
+      "parallel": [
+        {
+          "name": "schedule",
+          "requests": [
+            {
+              "name": "api",
+              "chain": [
+                [
+                  "gateway",
+                  5
+                ],
+                [
+                  "schedule",
+                  15
+                ],
+                [
+                  "db",
+                  8
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "grades",
+          "requests": [
+            {
+              "name": "api",
+              "chain": [
+                [
+                  "gateway",
+                  5
+                ],
+                [
+                  "grades",
+                  20
+                ],
+                [
+                  "db",
+                  10
+                ]
+              ]
+            }
+          ]
+        },
+        {
+          "name": "electives",
+          "requests": [
+            {
+              "name": "api",
+              "chain": [
+                [
+                  "gateway",
+                  5
+                ],
+                [
+                  "electives",
+                  28
+                ],
+                [
+                  "db",
+                  16
+                ]
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
