@@ -1,0 +1,37 @@
+digraph G {
+rankdir=LR; bgcolor=white; nodesep=0.12; ranksep=0.22;
+node [shape=box, style="rounded", fontname="Liberation Serif", fontsize=10, height=0.3, color=black];
+edge [arrowsize=0.6, color=black];
+U [label="Users
+(think time Z,
+delay τ)", shape=box, style="dashed"];
+n1 [label="shell\nEdge\n6 ms"];
+U -> n1;
+n2 [label="profile\nGateway→Profile→DBMS\n5+6+4 ms"];
+n1 -> n2;
+F [label="fork", shape=circle, fontsize=9, margin=0.02];
+n2 -> F;
+J [label="join", shape=circle, fontsize=9, margin=0.02];
+n3 [label="remoteEntry\nEdge\n4 ms"];
+F -> n3;
+n4 [label="chunk\nEdge\n10 ms"];
+n3 -> n4;
+n5 [label="api\nGateway→Schedule→DBMS\n5+15+8 ms"];
+n4 -> n5;
+n5 -> J;
+n6 [label="remoteEntry\nEdge\n4 ms"];
+F -> n6;
+n7 [label="chunk\nEdge\n10 ms"];
+n6 -> n7;
+n8 [label="api\nGateway→Grades→DBMS\n5+20+10 ms"];
+n7 -> n8;
+n8 -> J;
+n9 [label="remoteEntry\nEdge\n4 ms"];
+F -> n9;
+n10 [label="chunk\nEdge\n10 ms"];
+n9 -> n10;
+n11 [label="api\nGateway→Electives→DBMS\n5+28+16 ms"];
+n10 -> n11;
+n11 -> J;
+J -> U [constraint=false, style=dashed];
+}

@@ -10,21 +10,21 @@ from PIL import Image
 L = sys.argv[1] if len(sys.argv) > 1 else 'uk'
 T = {
  'uk': dict(N='Кількість користувачів N', R='Час відгуку сторінки R, мс', X='Пропускна здатність X, сторінок/с',
-            meas='Стенд (вимірювання)', seq='M1: послідовне MVA', fj='M2: MVA + fork-join',
-            fjs='M3: запропонована модель', sim='Імітація (SimPy)',
+            meas='Стенд (вимірювання)', seq='M1: класичний MVA', fj='M2: MVA з fork-join',
+            fjs='M3: запропонований метод', sim='Імітаційна модель (SimPy)', sim_s='імітаційна модель',
             A='а) базова конфігурація', B='б) масштабоване вузьке місце', U='Завантаження U',
-            mfe='Мікрофронтенди', mono='Монолітний SPA', rtt='Мережна затримка клієнта RTT, мс',
-            w1='а) X(N) після масштабування вузького місця', w2='б) R(RTT) за N = 30', mon_meas='стенд',
-            ms='мс', think='Користувачі\n(обдумування Z,\nзатримка RTT)', fork='розгалуження', join='злиття',
+            mfe='Мікрофронтенди', mono='Монолітний клієнт', rtt='Мережна затримка клієнта τ, мс',
+            w1='а) X(N) після масштабування вузького місця', w2='б) R(τ) за N = 30', mon_meas='стенд',
+            ms='мс', think='Користувачі\n(обдумування Z,\nзатримка τ)', fork='розгалуження', join='злиття',
             st=dict(edge='Edge', gateway='Шлюз', profile='Профіль', schedule='Розклад', grades='Успішність',
                     electives='Вибіркові', db='СКБД')),
  'en': dict(N='Number of users N', R='Page response time R, ms', X='Throughput X, pages/s',
-            meas='Testbed (measured)', seq='M1: sequential MVA', fj='M2: MVA + fork-join',
-            fjs='M3: proposed model', sim='Simulation (SimPy)',
+            meas='Testbed (measured)', seq='M1: classic MVA', fj='M2: MVA with fork-join',
+            fjs='M3: proposed method', sim='Simulation model (SimPy)', sim_s='simulation model',
             A='a) baseline configuration', B='b) scaled-out bottleneck', U='Utilization U',
-            mfe='Micro-frontends', mono='Monolithic SPA', rtt='Client network delay RTT, ms',
-            w1='a) X(N) after scaling out the bottleneck', w2='b) R(RTT) at N = 30', mon_meas='testbed',
-            ms='ms', think='Users\n(think time Z,\ndelay RTT)', fork='fork', join='join',
+            mfe='Micro-frontends', mono='Monolithic client', rtt='Client network delay τ, ms',
+            w1='a) X(N) after scaling out the bottleneck', w2='b) R(τ) at N = 30', mon_meas='testbed',
+            ms='ms', think='Users\n(think time Z,\ndelay τ)', fork='fork', join='join',
             st=dict(edge='Edge', gateway='Gateway', profile='Profile', schedule='Schedule', grades='Grades',
                     electives='Electives', db='DBMS')),
 }[L]
@@ -33,6 +33,12 @@ plt.rcParams.update({'font.family': 'Liberation Serif', 'font.size': 9, 'axes.li
 STY = {'seq': dict(ls=':', color='0.35'), 'fj': dict(ls='--', color='0.2'),
        'fjs': dict(ls='-', color='0.0'), 'sim': dict(ls='none', marker='x', color='0.3', ms=5)}
 CM = 1 / 2.54
+
+
+def sub(ax, text):
+    """Subfigure label (а), (б) placed under the axes, below the x-axis title."""
+    ax.annotate(text, xy=(0.5, 0), xycoords='axes fraction', xytext=(0, -32), textcoords='offset points',
+                ha='center', va='top', fontsize=9)
 
 
 def save(fig, name):
@@ -56,7 +62,7 @@ for ax, tag in zip(axs, 'AB'):
         ax.plot(p.N, p.R, label=T[mod], **STY[mod])
     ax.errorbar(mm.N, mm.R, yerr=mm.Rs, fmt='o', mfc='white', mec='black', ecolor='black', ms=4,
                 capsize=2, label=T['meas'], zorder=5)
-    ax.set_title(T[tag], fontsize=9); ax.set_xlabel(T['N']); ax.grid(alpha=0.3, lw=0.4)
+    sub(ax, T[tag]); ax.set_xlabel(T['N']); ax.grid(alpha=0.3, lw=0.4)
 axs[0].set_ylabel(T['R']); axs[0].legend(loc='upper left')
 save(fig, 'fig2_R_vs_N')
 
@@ -68,7 +74,7 @@ for tag, mk in (('A', 'o'), ('B', 's')):
     axs[0].errorbar(mm.N, mm.X, yerr=mm.Xs, fmt=mk, mfc='white', mec='black', ecolor='black', ms=4,
                     capsize=2, label=f"{T['mon_meas']} ({tag})")
 axs[0].set_xlabel(T['N']); axs[0].set_ylabel(T['X']); axs[0].legend(loc='lower right'); axs[0].grid(alpha=0.3, lw=0.4)
-axs[0].set_title(T['A'][:3] + ('пропускна здатність' if L == 'uk' else 'throughput'), fontsize=9)
+sub(axs[0], T['A'][:3] + ('пропускна здатність' if L == 'uk' else 'throughput'))
 ua = raw[raw.cfg == 'A'].groupby('N').mean(numeric_only=True)
 grays = ['0.0', '0.25', '0.45', '0.6', '0.75', '0.3', '0.5']
 mks = ['o', 's', '^', 'v', 'D', 'x', '+']
@@ -76,7 +82,7 @@ for i, st in enumerate(['electives', 'edge', 'grades', 'db', 'schedule', 'gatewa
     axs[1].plot(ua.index, ua['U_' + st], marker=mks[i], color=grays[i], ms=3.5, mfc='white', label=T['st'][st])
 axs[1].set_xlabel(T['N']); axs[1].set_ylabel(T['U']); axs[1].set_ylim(0, 1.32); axs[1].set_yticks([0, 0.2, 0.4, 0.6, 0.8, 1.0]); axs[1].legend(ncol=4, loc='upper center', fontsize=6.5, columnspacing=0.8, handlelength=1.6)
 axs[1].grid(alpha=0.3, lw=0.4)
-axs[1].set_title(('б) завантаження станцій (конфігурація A)' if L == 'uk' else 'b) station utilization (config. A)'), fontsize=9)
+sub(axs[1], 'б) завантаження станцій (конфігурація A)' if L == 'uk' else 'b) station utilization (config. A)')
 save(fig, 'fig3_X_U')
 
 # Fig. 4 - what-if
@@ -89,15 +95,15 @@ try:
     mm = meas[meas.cfg == 'B']
     axs[0].plot(mm.N, mm.X, 'o', mfc='white', mec='black', ms=4, label=f"{T['mfe']}, {T['mon_meas']}")
     sb = pd.read_csv('results/whatif_monoB_sim.csv')
-    axs[0].plot(sb.N, sb.X, 's', color='0.3', mfc='none', ms=5, label=f"{T['mono']}, {T['sim'].split(' ')[0].lower()}")
-    axs[0].set_xlabel(T['N']); axs[0].set_ylabel(T['X']); axs[0].legend(loc='lower right'); axs[0].set_title(T['w1'], fontsize=9)
+    axs[0].plot(sb.N, sb.X, 's', color='0.3', mfc='none', ms=5, label=f"{T['mono']}, {T['sim_s']}")
+    axs[0].set_xlabel(T['N']); axs[0].set_ylabel(T['X']); axs[0].legend(loc='upper left'); sub(axs[0], T['w1'])
     axs[0].grid(alpha=0.3, lw=0.4); axs[0].set_xlim(0, 145)
     for arch, ls, mk in (('mfe', '-', 'o'), ('mono', '--', 's')):
         p = w2[w2.arch == arch]
         axs[1].plot(p.rtt, p.R, color='black', ls=ls, label=T[arch])
         q = p.dropna(subset=['R_sim'])
-        axs[1].plot(q.rtt, q.R_sim, mk, color='0.3', mfc='none', ms=5, label=f"{T[arch]}, {T['sim'].split(' ')[0].lower()}")
-    axs[1].set_xlabel(T['rtt']); axs[1].set_ylabel(T['R']); axs[1].legend(); axs[1].set_title(T['w2'], fontsize=9)
+        axs[1].plot(q.rtt, q.R_sim, mk, color='0.3', mfc='none', ms=5, label=f"{T[arch]}, {T['sim_s']}")
+    axs[1].set_xlabel(T['rtt']); axs[1].set_ylabel(T['R']); axs[1].legend(); sub(axs[1], T['w2'])
     axs[1].grid(alpha=0.3, lw=0.4)
     save(fig, 'fig4_whatif')
 except FileNotFoundError:
